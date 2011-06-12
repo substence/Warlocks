@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="955" height="600" applicationComplete="application1_applicationCompleteHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import tooltips.HTMLToolTip;
+			import com.mistermartinez.core.MML;
+			import com.mistermartinez.utils.QuickFrameTimer;
+			import com.mistermartinez.utils.UpdateHandler;
+			import com.mistermartinez.utils.sceneHandler.SceneHandler;
+			import com.mistermartinez.utils.sceneHandler.SceneLayersLibrary;
+			
+			import mx.controls.Image;
+			import mx.events.FlexEvent;
+			import mx.managers.ToolTipManager;
+			
+			import skills.ActivatableSkill;
+			import skills.Skill;
+			import skills.finalSkills.WindWalkSkill;
+			
+			import spark.components.Button;
+			
+			import ui.flexComponents.PlayingUI;
+			private var gd:GameDirector;
+			
+
+			protected function application1_applicationCompleteHandler(event:FlexEvent):void
+			{
+  				MML.initialize(this.stage);
+ 				gd = new GameDirector();
+				UpdateHandler.instance.addUpdatee(gd);
+				//SceneLayersLibrary.foreground.addChild(this); 
+				var playingUI:PlayingUI = new PlayingUI();
+				playingUI.gameDirector = gd;
+				var image:Image = new Image();
+				image.source = SceneHandler.instance.canvas;
+				addElement(image);
+				addElement(playingUI);
+				ToolTipManager.showDelay = 250;
+				ToolTipManager.toolTipClass = HTMLToolTip;
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+</s:Application>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ProgressBar xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" preinitialize="progressbar1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import skins.ProgressBarSkinCustom;
+			import skins.ProgressBarTrackSkinCustom;
+			private var _barSkin:ProgressBarSkinCustom;
+			private var _trackSkin:ProgressBarTrackSkinCustom;
+			
+			public function set barColor(value:uint):void
+			{
+				_barSkin.barColor = value;
+			}
+			
+			public function set trackColor(value:uint):void
+			{
+				_trackSkin.trackColor = value;
+			}
+
+			protected function progressbar1_creationCompleteHandler(event:FlexEvent):void
+			{
+				setStyle("barSkin", ProgressBarSkinCustom);
+				setStyle("trackSkin", ProgressBarTrackSkinCustom);
+				_barSkin = getStyle("barSkin") as ProgressBarSkinCustom;
+				_trackSkin = getStyle("trackSkin") as ProgressBarTrackSkinCustom;
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+</mx:ProgressBar>

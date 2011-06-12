@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="80" creationComplete="addedToStage(event)">
+	<fx:Script>
+		<![CDATA[
+			import skills.ActivatableSkill;
+			import skills.IActivatable;
+			import skills.Skill;
+			public var skillList:Vector.<Skill>;
+			
+			protected function addedToStage(event:Event):void
+			{
+				for (var i:int = 0; i < this.skillList.length; i++) 
+				{
+					var skill:Skill = skillList[i];
+					var skillDisplay:*;
+					if (skill is ActivatableSkill)
+					{
+						skillDisplay = new ActivatableSkillDisplay();
+						ActivatableSkillDisplay(skillDisplay).activeSkill = ActivatableSkill(skill);
+					}
+					else
+					{
+						skillDisplay = new SkillDisplay();
+						skillDisplay.skill = skill;
+					}
+					addElement(skillDisplay);
+				}
+			}
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:HorizontalLayout/>
+	</s:layout>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+</s:Group>

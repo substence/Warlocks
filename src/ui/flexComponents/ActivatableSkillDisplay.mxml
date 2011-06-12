@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+							 xmlns:s="library://ns.adobe.com/flex/spark" 
+							 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:flexComponents="ui.flexComponents.*" width="64" height="74" 
+							 addedToStage="onCreationComplete(event)"
+							 enterFrame="onEnterFrame(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.mistermartinez.utils.InputHandler;
+			
+			import mx.skins.halo.ProgressBarSkin;
+			import mx.skins.spark.ProgressBarSkin;
+			
+			import skills.ActivatableSkill;
+			import skills.Skill;
+			
+			import tooltips.ToolTipUtilities;
+			public var skillDisplay:SkillDisplay;
+			public var activeSkill:ActivatableSkill;
+			
+			public function update():void
+			{
+				updateRechargeBar();
+				updateAlpha();
+			}
+			
+			private function updateRechargeBar(event:Event = null):void
+			{
+				rechargeBar.setProgress(activeSkill.timer.percentComplete, 1);
+			}
+			
+			private function updateAlpha(event:Event = null):void
+			{
+				skillDisplay.icon.alpha = isBusy() ? SkillDisplay.FADE_ALPHA : 1;
+			}
+			
+			public function isBusy():Boolean
+			{
+				return activeSkill.isActive || activeSkill.isRecharging;
+			}
+			
+			protected function onImageClick(event:MouseEvent):void
+			{
+				if (!isBusy())
+					activeSkill.activate();
+			}
+
+			protected function onCreationComplete(event:Event):void
+			{
+				skillDisplay= new SkillDisplay();
+				skillDisplay.skill = activeSkill as Skill;
+				skillDisplay.icon.addEventListener(MouseEvent.CLICK, onIconClick);
+				skillDisplay.hotKeyLabel.text = String.fromCharCode(activeSkill.hotKey);
+				addElement(skillDisplay);
+			}
+			
+			private function onIconClick(event:MouseEvent):void
+			{
+				activeSkill.activate();
+			}
+
+			protected function onEnterFrame(event:Event):void
+			{
+				update();
+			}
+		]]>
+	</fx:Script>
+	<s:layout>
+		<s:VerticalLayout gap="0"/>
+	</s:layout>
+	<fx:Declarations>
+	</fx:Declarations>
+	<mx:ProgressBar id="rechargeBar" width="100%" height="10" mode="manual" label=""/>
+</s:Group>

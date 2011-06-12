@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 removedFromStage="removedFromStage(event)" addedToStage="addedToStage(event)" implements="com.mistermartinez.interfaces.IUpdatable" xmlns:flexComponents="ui.flexComponents.*">
+	<fx:Script>
+		<![CDATA[
+			import com.mistermartinez.math.MathX;
+			import com.mistermartinez.utils.InputHandler;
+			import com.mistermartinez.utils.UpdateHandler;
+			
+			import components.CProperty;
+			
+			import mx.core.FlexSprite;
+			import mx.core.UIComponent;
+			import mx.effects.AnimateProperty;
+			
+			import players.Warlock;
+			
+			import properties.Properties;
+			
+			import skills.Skill;
+			
+			import spark.components.Image;
+			import spark.components.Label;
+			import spark.effects.Animate;
+			import spark.effects.Fade;
+			import spark.effects.Move;
+			
+			public var warlock:Warlock;
+			private var _health:CProperty;
+			private var _rangeCircle:UIComponent;
+
+			public function update():void
+			{
+				x = warlock.position.x - healthBar.width * .5;
+				y = warlock.position.y - healthBar.height * .5;
+				healthBar.setProgress(_health.value, _health.maxmimum);
+			}
+
+			protected function addedToStage(event:Event):void
+			{
+				_rangeCircle = new UIComponent();
+				healthBar.width = warlock.graphic.width;
+				_health = CProperty(warlock.getComponentByName(Properties.HEALTH));
+				_health.eventDispatcher.addEventListener(CProperty.DECREASED, onHealthDecrease);
+				_health.eventDispatcher.addEventListener(CProperty.INCREASED, onHealthIncrease);
+				warlock.addEventListener(Warlock.ACTIVATED_SKILL, activatedSkill);
+				UpdateHandler.instance.addUpdatee(this);
+			}
+			
+			private function onHealthIncrease(event:Event):void
+			{
+				showFloatText(0x00FF00);
+			}
+			
+			private function onHealthDecrease(event:Event):void
+			{
+				showFloatText(0xFF0000);
+			}
+			
+			private function showFloatText(color:uint):void
+			{
+				var label:Label = new Label();
+				var difference:Number = Math.round(_health.value - _health.previousValue);
+				label.text = (difference > 0 ? "+" : "") + difference;
+				label.setStyle("color", color);
+				label.setStyle("fontWeight", "bold");
+				addElement(label);
+				var move:Move = new Move(label);
+				move.yBy = -25;
+				var width:Number = warlock.graphic.width * 2;
+				move.xBy = MathX.getRandomNumberBetween(-width, width);
+				move.duration = 1000;
+				move.play();
+				var fade:Fade = new Fade(label);
+				fade.alphaTo = 0;
+				fade.duration = 1000;
+				fade.play();
+			}
+			
+			private function activatedSkill(event:Event):void
+			{
+				var skill:Skill = warlock.activeSkill;
+				var range:Number = skill.range;
+				if (range > 0 && range < Number.MAX_VALUE)
+				{
+					_rangeCircle.graphics.clear();
+					_rangeCircle.graphics.lineStyle(1, warlock.user.color, .25);
+					_rangeCircle.graphics.drawCircle(warlock.graphic.width * .5, warlock.graphic.height * .5, range);
+					addElement(_rangeCircle);
+					skill.addEventListener(Skill.DEACTIVATE, deactivatedSkill);
+				}
+			}
+			
+			private function deactivatedSkill(event:Event):void
+			{
+				event.target.removeEventListener(Skill.DEACTIVATE, deactivatedSkill);
+				if (_rangeCircle)
+				{
+					removeElement(_rangeCircle);
+				}
+			}
+
+			protected function removedFromStage(event:Event):void
+			{
+				_health.eventDispatcher.removeEventListener(CProperty.DECREASED, onHealthDecrease);
+				_health.eventDispatcher.removeEventListener(CProperty.INCREASED, onHealthIncrease);
+				warlock.removeEventListener(Warlock.ACTIVATED_SKILL, activatedSkill);
+				UpdateHandler.instance.removeUpdatee(this);
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<flexComponents:ProgressBarCustom id="healthBar" label="" mode="manual"/>
+</s:Group>
