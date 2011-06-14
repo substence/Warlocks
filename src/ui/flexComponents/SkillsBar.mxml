@@ -22,7 +22,7 @@
 					}
 					else
 					{
-						skillDisplay = new SkillDisplay();
+						skillDisplay = new SkillView();
 						skillDisplay.skill = skill;
 					}
 					addElement(skillDisplay);

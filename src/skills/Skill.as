@@ -14,8 +14,6 @@ package skills
 
 	public class Skill extends EventDispatcher implements IUpdatable, IDestroyable
 	{
-		public static const DEACTIVATE:String = "skillDeactivated";
-		public static const ACTIVATE:String = "skillActivated";
 		public static const MAX_LEVEL:uint = 6;
 		public static const LEVEL_CHANGED:String = "skillLevelChanged";
 		public var name:String;
@@ -24,6 +22,8 @@ package skills
 		public var range:Number;
 		public var desription:String;
 		public var warlock:Warlock;
+		public var cost:uint;
+		public var upgradeCost:uint;
 		protected var _level:int;
 		
 		public function Skill()
@@ -33,6 +33,8 @@ package skills
 			tags = new Vector.<String>();
 			icon = new Sprite();
 			range = Number.MAX_VALUE;
+			cost = 1;
+			upgradeCost = 1;
 			desription = "This is the description";
 		}
 

@@ -12,9 +12,8 @@ package buffs
 		private var _modifier:WindWalkMoveSpeedModifier;
 		private var _moveSpeedAmount:Number;
 		
-		public function WindWalkBuff(duration:uint, moveSpeedAmount:Number)
+		public function WindWalkBuff(moveSpeedAmount:Number)
 		{
-			super(duration);
 			name = "Wind Walking";
 			description = "Invisible to enemies and increased movement. Still able to be hit";
 			_moveSpeedAmount = moveSpeedAmount;
@@ -31,7 +30,7 @@ package buffs
 			}
 		}
 		
-		override protected function onComplete():void
+		override protected function onEnd():void
 		{
 			setTargetAlpha(1);
 			var property:CModifiableProperty = getMoveSpeedProperty();

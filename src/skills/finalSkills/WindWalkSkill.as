@@ -37,7 +37,8 @@ package skills.finalSkills
 		
 		override protected function onActivation():void
 		{
-			_buff = new WindWalkBuff(_activationTimer.durationInSeconds, _moveSpeedAmount);
+			_buff = new WindWalkBuff(_moveSpeedAmount);
+			_buff.timer = _activationTimer;
 			warlock.addBuff(_buff);
 		}
 		

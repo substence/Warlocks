@@ -23,6 +23,7 @@ package players
 	
 	import properties.Properties;
 	
+	import skills.ActivatableClickSkill;
 	import skills.ActivatableSkill;
 	import skills.ISkillable;
 	import skills.Skill;
@@ -32,7 +33,7 @@ package players
 	public class Warlock extends b2VisibleEntity implements IOwned, IBuffable, ISkillable
 	{
 		public static const DEFAULT_HEALTH:uint = 100;
-		public static const DEFAULT_MOVESPEED:uint = 100;
+		public static const DEFAULT_MOVESPEED:uint = 150;
 		public static const REACHED_MOVETARGET:String = "warlockReachedMoveTarget";
 		public static const ACTIVATED_SKILL:String = "warlockActivatedSkill";
 		public static var groupIndex:int = -1;
@@ -58,7 +59,7 @@ package players
 			groupIndex = Warlock.groupIndex;
 			this.user = user;
 			//
-			user.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+			user.addEventListener(KeyboardEvent.KEY_UP, onKeyDown);
 			Warlock.groupIndex--;
 			addComponent(new CBoundsController(this, CBoundsController.STOP));
 			addComponent(new CModifiableProperty(DEFAULT_HEALTH, 0), Properties.HEALTH);
@@ -72,11 +73,20 @@ package players
 		
 		public function set activeSkill(value:ActivatableSkill):void
 		{
+			if (_activeSkill == value)
+				return;
 			if (_activeSkill)
-				_activeSkill.deactivate();
+			{
+				//if (_activeSkill is ActivatableClickSkill)
+				_activeSkill.removeEventListener(ActivatableSkill.DEACTIVATE, deactivateActiveSkill);
+				//_activeSkill.cancel();
+			}
 			_activeSkill = value;
-			_activeSkill.addEventListener(Skill.DEACTIVATE, deactivateActiveSkill);
-			dispatchEvent(new Event(ACTIVATED_SKILL));
+			if (_activeSkill)
+			{
+				_activeSkill.addEventListener(ActivatableSkill.DEACTIVATE, deactivateActiveSkill);
+				dispatchEvent(new Event(ACTIVATED_SKILL));
+			}
 		}
 
 		public function get skills():Vector.<Skill>
@@ -106,13 +116,34 @@ package players
 			}
 		}
 		
-		public function addBuff(buff:Buff):void
+		public function addBuff(buff:Buff):Boolean
 		{
 			var index:int = _buffs.indexOf(buff);
 			if (index >= 0)
-				throw new Error("You are trying to add a buff that already exists, this isnt good. " + buff);
+			{
+				_buffs[index].charges += buff.charges;
+				return false;
+			}
+			var existingBuff:Buff = getBuffByType(Object(buff).constructor);
+			if (existingBuff)
+			{
+				existingBuff.charges += buff.charges;
+				return false;
+			}
 			_buffs.push(buff);
 			buff.equip(this);
+			return true;
+		}
+		
+		private function getBuffByType(type:Class):Buff
+		{
+			for (var i:int = 0; i < _buffs.length; i++) 
+			{
+				var buff:Buff = _buffs[i];
+				if (buff is type)
+					return buff;
+			}
+			return null;
 		}
 		
 		public function removeBuff(buff:Buff):void
@@ -143,7 +174,7 @@ package players
 		
 		private function deactivateActiveSkill(event:Event = null):void
 		{
-			_activeSkill.removeEventListener(Skill.DEACTIVATE, deactivateActiveSkill);
+			_activeSkill.removeEventListener(ActivatableSkill.DEACTIVATE, deactivateActiveSkill);
 			_activeSkill = null;
 		}
 		
@@ -151,7 +182,7 @@ package players
 		{
 			child.addEventListener(Entity.ENTITY_DESTROYED, childDestroyed);
 			_children.push(child);
-			if (child is IDrawable)
+			if (child is IDrawable && IDrawable(child).graphic)
 				SceneLayersLibrary.foreground.addChild(IDrawable(child).graphic);
 		}
 		
@@ -159,7 +190,7 @@ package players
 		{
 			child.removeEventListener(Entity.ENTITY_DESTROYED, childDestroyed);
 			_children.splice(_children.indexOf(child), 1);
-			if (child is IDrawable)
+			if (child is IDrawable && IDrawable(child).graphic)
 				SceneLayersLibrary.foreground.removeChild(IDrawable(child).graphic)
 		}
 		
@@ -172,6 +203,28 @@ package players
 		{
 			var keyPressed:uint = event.keyCode;
 			checkSkillActivate(keyPressed);
+		}
+		
+		public function purchaseSkill(skill:Skill):Boolean
+		{
+			if (user.points >= skill.cost && _skills.indexOf(skill) == -1)
+			{
+				user.points -= skill.cost;
+				addSkill(skill);
+				return true;
+			}
+			return false;
+		}
+		
+		public function upgradeSkill(skill:Skill):Boolean
+		{
+			if (user.points >= skill.upgradeCost && skill.level < Skill.MAX_LEVEL)
+			{
+				user.points -= skill.upgradeCost;
+				skill.upgrade();
+				return true;
+			}
+			return false;
 		}
 		
 		private function checkSkillActivate(keyPressed:uint):void
@@ -228,7 +281,7 @@ package players
 		override public function destroy():void
 		{
 			super.destroy();
-			user.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+			user.removeEventListener(KeyboardEvent.KEY_UP, onKeyDown);
 		}		
 	}
 }

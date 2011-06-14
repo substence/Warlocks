@@ -16,7 +16,7 @@ package terrains
 		public var duration:uint;
 		public var activeLayer:ITerrainLayer;
 		private var _timer:FrameTimer;
-		private var _layers:Vector.<ITerrainLayer>;
+		public var _layers:Vector.<ITerrainLayer>;
 		private var _graphic:Sprite;
 		
 		public function Terrain(duration:uint)

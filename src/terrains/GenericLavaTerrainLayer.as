@@ -1,6 +1,7 @@
 package terrains
 {
 	import com.mistermartinez.math.Vector2D;
+	import com.mistermartinez.utils.InputHandler;
 	
 	import flash.display.DisplayObject;
 	import flash.display.Shape;
@@ -42,7 +43,6 @@ package terrains
 		
 		public function update():void
 		{
-			
 		}
 		
 		public function draw():void

@@ -4,6 +4,7 @@ package users
 	import com.mistermartinez.interfaces.ISpatial;
 	import com.mistermartinez.utils.InputHandler;
 	
+	import flash.events.Event;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.ui.Keyboard;
@@ -12,14 +13,16 @@ package users
 
 	public class User extends Entity
 	{
+		public static const INPUT_ACTION:String = "inputAction";
 		public var leftKeys:Vector.<int> = Vector.<int>([Keyboard.A, Keyboard.LEFT]);
 		public var upKeys:Vector.<int> = Vector.<int>([Keyboard.W, Keyboard.UP]);
 		public var rightKeys:Vector.<int> = Vector.<int>([Keyboard.D, Keyboard.RIGHT]);
 		public var downKeys:Vector.<int> = Vector.<int>([Keyboard.S, Keyboard.DOWN]);
 		//public var weaponKeys:Vector.<int> = Vector.<int>([Keyboard.NUMBER_1, Keyboard.NUMBER_2, Keyboard.NUMBER_3, Keyboard.NUMBER_4, Keyboard.NUMBER_5, Keyboard.NUMBER_6, Keyboard.NUMBER_7]);
 		private var _warlock:Warlock;
-		public var points:uint;
 		public var color:uint;
+		[Bindable]
+		public var points:uint;
 		
 		public function User(color:uint = 0xFF0000)
 		{
@@ -43,6 +46,7 @@ package users
 
 		private function echoInputEvent(event:*):void
 		{
+			dispatchEvent(new Event(INPUT_ACTION));
 			dispatchEvent(event);
 		}
 		

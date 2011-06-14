@@ -8,16 +8,24 @@ package buffs
 
 	public class TimedBuff extends Buff implements ITimed
 	{
+		public static const TIMER_COMPLETE:String = "buffTimerComplete";
 		private var _timer:FrameTimer;
 		
-		public function TimedBuff(duration:uint, isDebuff:Boolean = false)
+		public function TimedBuff(duration:uint = 0, isDebuff:Boolean = false)
 		{
 			super(isDebuff);
-			_timer = new FrameTimer();
-			_timer.addEventListener(FrameTimer.TIMER_COMPLETE, onTimerComplete);
+			timer = new FrameTimer();
 			this.duration = duration;
 		}
 		
+		public function set timer(value:FrameTimer):void
+		{
+			if (_timer)
+				_timer.removeEventListener(FrameTimer.TIMER_COMPLETE, onTimerComplete);
+			_timer = value;
+			_timer.addEventListener(FrameTimer.TIMER_COMPLETE, onTimerComplete);
+		}
+
 		public function get timer():FrameTimer
 		{
 			return _timer;
@@ -37,12 +45,13 @@ package buffs
 		override protected function onUnEquip():void
 		{
 			_timer.stop();
-			onComplete();
+			onEnd();
 		}
 		
 		private function onTimerComplete(event:Event):void
 		{
-			target.removeBuff(this);
+			//target.removeBuff(this);
+			dispatchEvent(new Event(TIMER_COMPLETE));
 		}
 		
 		protected function onStart():void
@@ -50,7 +59,7 @@ package buffs
 			
 		}
 		
-		protected function onComplete():void
+		protected function onEnd():void
 		{
 			
 		}
@@ -58,9 +67,12 @@ package buffs
 		override public function destroy():void
 		{
 			super.destroy();
-			_timer.stop();
-			_timer.removeEventListener(FrameTimer.TIMER_COMPLETE, onTimerComplete);
-			_timer = null;
+			if (_timer)
+			{
+				_timer.stop();
+				_timer.removeEventListener(FrameTimer.TIMER_COMPLETE, onTimerComplete);
+				_timer = null;
+			}
 		}
 	}
 }

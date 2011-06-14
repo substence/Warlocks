@@ -3,9 +3,11 @@
 							 xmlns:s="library://ns.adobe.com/flex/spark" 
 							 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:flexComponents="ui.flexComponents.*" width="64" height="74" 
 							 addedToStage="onCreationComplete(event)"
+							 removedFromStage="removedFromStage(event)"
 							 enterFrame="onEnterFrame(event)">
 	<fx:Script>
 		<![CDATA[
+			import com.mistermartinez.utils.FrameTimer;
 			import com.mistermartinez.utils.InputHandler;
 			
 			import mx.skins.halo.ProgressBarSkin;
@@ -14,14 +16,22 @@
 			import skills.ActivatableSkill;
 			import skills.Skill;
 			
+			import spark.filters.GlowFilter;
+			
 			import tooltips.ToolTipUtilities;
-			public var skillDisplay:SkillDisplay;
+			public var skillDisplay:SkillView;
 			public var activeSkill:ActivatableSkill;
+			private var _glow:GlowFilter;
 			
 			public function update():void
 			{
 				updateRechargeBar();
-				updateAlpha();
+			}
+			
+			private function updateHighlight(event:Event = null):void
+			{
+				trace(activeSkill.isActive);
+				skillDisplay.iconGroup.filters = activeSkill.isActive ? [_glow] : [];
 			}
 			
 			private function updateRechargeBar(event:Event = null):void
@@ -31,12 +41,12 @@
 			
 			private function updateAlpha(event:Event = null):void
 			{
-				skillDisplay.icon.alpha = isBusy() ? SkillDisplay.FADE_ALPHA : 1;
+				skillDisplay.icon.alpha = isBusy() ? SkillView.FADE_ALPHA : 1;
 			}
 			
 			public function isBusy():Boolean
 			{
-				return activeSkill.isActive || activeSkill.isRecharging;
+				return activeSkill.isRecharging;
 			}
 			
 			protected function onImageClick(event:MouseEvent):void
@@ -47,11 +57,17 @@
 
 			protected function onCreationComplete(event:Event):void
 			{
-				skillDisplay= new SkillDisplay();
+				_glow = new GlowFilter(activeSkill.warlock.user.color, 1, 8, 8, 2);
+				skillDisplay= new SkillView();
 				skillDisplay.skill = activeSkill as Skill;
 				skillDisplay.icon.addEventListener(MouseEvent.CLICK, onIconClick);
+				activeSkill.addEventListener(ActivatableSkill.ACTIVATE, updateHighlight);
+				activeSkill.addEventListener(ActivatableSkill.DEACTIVATE, updateHighlight);
+				activeSkill.timer.addEventListener(FrameTimer.TIMER_START, updateAlpha);
+				activeSkill.timer.addEventListener(FrameTimer.TIMER_STOP, updateAlpha);
 				skillDisplay.hotKeyLabel.text = String.fromCharCode(activeSkill.hotKey);
 				addElement(skillDisplay);
+				updateAlpha();
 			}
 			
 			private function onIconClick(event:MouseEvent):void
@@ -63,6 +79,16 @@
 			{
 				update();
 			}
+
+			protected function removedFromStage(event:Event):void
+			{
+				skillDisplay.icon.removeEventListener(MouseEvent.CLICK, onIconClick);
+				activeSkill.removeEventListener(ActivatableSkill.ACTIVATE, updateHighlight);
+				activeSkill.removeEventListener(ActivatableSkill.DEACTIVATE, updateHighlight);
+				activeSkill.timer.removeEventListener(FrameTimer.TIMER_STOP, updateAlpha);
+				activeSkill.timer.removeEventListener(FrameTimer.TIMER_START, updateAlpha);			
+			}
+
 		]]>
 	</fx:Script>
 	<s:layout>

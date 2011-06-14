@@ -12,14 +12,12 @@ package skills.finalSkills
 	
 	import com.mistermartinez.entities.CollisionEvent;
 	import com.mistermartinez.entities.Entity;
-	import com.mistermartinez.interfaces.ICollidable;
-	import com.mistermartinez.interfaces.IEntity;
-	import com.mistermartinez.interfaces.ISpatial;
+	import com.mistermartinez.interfaces.*;
 	import com.mistermartinez.math.Vector2D;
-	import com.mistermartinez.utils.Box2DHandler;
-	import com.mistermartinez.utils.FrameTimer;
-	import com.mistermartinez.utils.InputHandler;
-	import com.mistermartinez.utils.NumberRange;
+	import com.mistermartinez.utils.*;
+	import com.mistermartinez.utils.sceneHandler.SceneLayersLibrary;
+	
+	import flash.display.Shape;
 	
 	import interfaces.IFullDescription;
 	
@@ -52,7 +50,7 @@ package skills.finalSkills
 		private var _damage:Number;
 		private var _buff:DamageOverTimeBuff;
 		private var _maxForce:Number;
-
+		private var _trail:Shape;
 		
 		public function LinkSkill(rechargeDuration:Number=1, launchForce:Number=10)
 		{
@@ -86,7 +84,10 @@ package skills.finalSkills
 		{
 			super.update();
 			if (_joint)
+			{
 				_joint.SetTarget(warlock.body.GetWorldCenter());
+				updateTrailGraphic();
+			}
 			if (_target)
 				_target.position = _projectile.position;
 		}
@@ -95,19 +96,41 @@ package skills.finalSkills
 		{
 			var startingPosition:Vector2D = warlock.position.clone();
 			var targetPosition:Vector2D = target.position.clone();
-			_projectile = new WarlockProjectile(startingPosition, VectorArt.getCircle(2.5, 0x00FF00));
+			_projectile = new WarlockProjectile(startingPosition, VectorArt.getCircle(2.5, warlock.user.color));
 			_projectile.owner = warlock;
 			_projectile.fixture.SetSensor(true);
 			warlock.addChild(_projectile);
 			launchProjectile(_projectile, new Vector2D(target.position.x - warlock.position.x, target.position.y - warlock.position.y));
 			createJoint(_projectile);
+			addTrailGraphic();
 			_projectile.addEventListener(WarlockProjectile.LAUNCH_SUCCESS, onLaunchSuccess);
+		}
+		
+		private function addTrailGraphic():void
+		{
+			_trail = new Shape();
+			SceneLayersLibrary.foreground.addChild(_trail);
+		}
+		
+		private function removeTrailGraphic():void
+		{
+			if (_trail && _trail.parent)
+				SceneLayersLibrary.foreground.removeChild(_trail);
+		}
+		
+		private function updateTrailGraphic():void
+		{
+			_trail.x = warlock.graphic.x;
+			_trail.y = warlock.graphic.y;
+			_trail.graphics.clear();
+			_trail.graphics.lineStyle(1, warlock.user.color, .8);
+			_trail.graphics.lineTo(_projectile.graphic.x - _trail.x , _projectile.graphic.y - _trail.y);
 		}
 		
 		private function onLaunchSuccess(event:CollisionEvent):void
 		{
 			_projectile.removeEventListener(WarlockProjectile.LAUNCH_SUCCESS, onLaunchSuccess);
-			_projectile.addEventListener(CollisionEvent.COLLIDED, onProjectileCollide);
+			warlock.addEventListener(CollisionEvent.COLLIDED, onWarlockCollide);
 			_projectile.addEventListener(WarlockProjectile.VALID_HIT, onProjectileValidHit);
 		}
 		
@@ -128,11 +151,29 @@ package skills.finalSkills
 			}
 		}
 		
-		private function onProjectileCollide(event:CollisionEvent):void
+		private function onWarlockCollide(event:CollisionEvent):void
 		{
 			var target:ICollidable = event.b;
-			if (target == warlock || (_target && _target == target))
+			if (target == _projectile || (_target && _target == target))
 				deactivate();
+		}
+		
+		override public function cancel():Boolean
+		{
+			if (_joint)
+				return false;
+			deactivate();
+			return true;
+		}
+		
+		override protected function onActivateAttempt():void
+		{
+			if (_target)
+			{
+				if (_target is IAdvancedSpatial)
+					IAdvancedSpatial(_target).applyForce(_projectile.velocity);
+				deactivate();
+			}
 		}
 		
 		override protected function onDeactivation():void
@@ -141,10 +182,11 @@ package skills.finalSkills
 			{
 				Box2DHandler.instance.world.DestroyJoint(_joint);
 				_joint = null;
+				removeTrailGraphic();
 			}
 			if (_projectile)
 			{
-				_projectile.removeEventListener(CollisionEvent.COLLIDED, onProjectileCollide);
+				warlock.removeEventListener(CollisionEvent.COLLIDED, onWarlockCollide);
 				_projectile.removeEventListener(WarlockProjectile.VALID_HIT, onProjectileValidHit);
 				_projectile.isDead = true;
 			}

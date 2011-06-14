@@ -10,12 +10,17 @@ package skills
 	
 	public class ActivatableSkill extends Skill implements IActivatable
 	{
+		public static const DEACTIVATE:String = "skillDeactivated";
+		public static const ACTIVATE:String = "skillActivated";
+		public static const CANCEL:String = "skillCanceled";
 		public var hotKey:uint;
+		protected var _canCancel:Boolean;
 		protected var _rechargeTimer:FrameTimer;
 		protected var _activationTimer:FrameTimer;
 		
 		public function ActivatableSkill(rechargeDuration:Number = 0, activationDuration:Number = 0)
 		{
+			_canCancel = true;
 			_rechargeTimer = new FrameTimer();
 			_rechargeTimer.addEventListener(FrameTimer.TIMER_COMPLETE, onRechargeTimerComplete);
 			this.rechargeDuration = rechargeDuration;
@@ -51,21 +56,43 @@ package skills
 		
 		public function activate():Boolean
 		{
-			if (isActive || isRecharging || !warlock)
+			onActivateAttempt();
+			if (!canActivate())
 				return false;
 			_activationTimer.reset();
 			_activationTimer.start();
-			dispatchEvent(new Event(Skill.ACTIVATE));
+			dispatchEvent(new Event(ACTIVATE));
 			onActivation();
 			return true;
+		}
+		
+		protected function canActivate():Boolean
+		{
+			return !(isActive || isRecharging || !warlock);
+		}
+		
+		protected function onActivateAttempt():void
+		{
+			
+		}
+		
+		public function cancel():Boolean
+		{
+			if (isActive && _canCancel)
+			{
+				dispatchEvent(new Event(CANCEL));
+				onCancel();
+				deactivate();
+				return true;
+			}
+			return false;
 		}
 		
 		public function deactivate():void
 		{
 			_activationTimer.stop();
-			startRecharge();
-			dispatchEvent(new Event(Skill.DEACTIVATE));
 			onDeactivation();
+			dispatchEvent(new Event(DEACTIVATE));
 		}
 		
 		protected function startRecharge():void
@@ -84,14 +111,20 @@ package skills
 			
 		}
 		
-		protected function onActivation():void
+		
+		protected virtual function onCancel():void
 		{
 			
 		}
 		
-		protected function onDeactivation():void
+		protected virtual function onActivation():void
 		{
 			
+		}
+		
+		protected virtual function onDeactivation():void
+		{
+			startRecharge();
 		}
 		
 		override public function destroy():void

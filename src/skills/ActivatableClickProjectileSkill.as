@@ -26,7 +26,7 @@ package skills
 			_launchForce = launchForce;
 		}
 
-		override protected function onClickActivation(target:ISpatial):void
+		override protected function onSecondaryActivation(target:ISpatial):void
 		{
 			createProjectile(target);
 		}

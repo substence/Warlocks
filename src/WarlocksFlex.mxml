@@ -5,12 +5,13 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import tooltips.HTMLToolTip;
 			import com.mistermartinez.core.MML;
 			import com.mistermartinez.utils.QuickFrameTimer;
 			import com.mistermartinez.utils.UpdateHandler;
 			import com.mistermartinez.utils.sceneHandler.SceneHandler;
 			import com.mistermartinez.utils.sceneHandler.SceneLayersLibrary;
+			
+			import mouse.MouseView;
 			
 			import mx.controls.Image;
 			import mx.events.FlexEvent;
@@ -22,7 +23,9 @@
 			
 			import spark.components.Button;
 			
-			import ui.flexComponents.PlayingUI;
+			import tooltips.HTMLToolTip;
+			
+			import ui.flexComponents.PlayingView;
 			private var gd:GameDirector;
 			
 
@@ -32,14 +35,15 @@
  				gd = new GameDirector();
 				UpdateHandler.instance.addUpdatee(gd);
 				//SceneLayersLibrary.foreground.addChild(this); 
-				var playingUI:PlayingUI = new PlayingUI();
+				var playingUI:PlayingView = new PlayingView();
 				playingUI.gameDirector = gd;
 				var image:Image = new Image();
-				image.source = SceneHandler.instance.canvas;
+				image.source = SceneHandler.instance.container;
 				addElement(image);
 				addElement(playingUI);
 				ToolTipManager.showDelay = 250;
 				ToolTipManager.toolTipClass = HTMLToolTip;
+				MouseView.init();
 			}
 		]]>
 	</fx:Script>

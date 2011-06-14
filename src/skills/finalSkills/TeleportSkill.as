@@ -45,7 +45,7 @@ package skills.finalSkills
 			level = 1;
 		}
 		
-		override protected function onClickActivation(target:ISpatial):void
+		override protected function onSecondaryActivation(target:ISpatial):void
 		{
 			warlock.position = target.position;
 			addFadeGraphic();

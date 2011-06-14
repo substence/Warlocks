@@ -5,50 +5,77 @@ package skills
 	import com.mistermartinez.utils.DummySpatial;
 	import com.mistermartinez.utils.InputHandler;
 	
+	import flash.events.Event;
 	import flash.events.MouseEvent;
+	
+	import mouse.MouseView;
 
 	public class ActivatableClickSkill extends ActivatableSkill
 	{
+		protected var _doesQuickActivate:Boolean;
+		protected var _isClickMode:Boolean;
+
 		public function ActivatableClickSkill(rechargeDuration:Number = 1)
 		{
 			super(rechargeDuration);
+			_doesQuickActivate = Config.HAS_EASY_ACTIVATION;
 		}
 		
 		override protected function onActivation():void
 		{
-			if (Config.HAS_EASY_ACTIVATION)
+			if (_isClickMode)//isActive)
 			{
-				onClick();
-				return;
+				secondaryActivation();
 			}
-			warlock.user.addEventListener(MouseEvent.MOUSE_UP, onClick);
+			else
+			{
+				MouseView.changeMouseCursor(MouseView.ATTACK);
+				_isClickMode = true;
+				if (_doesQuickActivate)
+				{
+					secondaryActivation();
+					deactivate();
+				}
+				else
+				{
+					warlock.user.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+				}
+			}
+		}
+		
+		private function onMouseUp(event:MouseEvent):void
+		{
+			activate();
 		}
 		
 		override protected function onDeactivation():void
 		{
-			removeOnClickListeer();
+			_isClickMode = false;
+			MouseView.changeMouseCursor(MouseView.DEFAULT);
+			startRecharge();
+			if (!_doesQuickActivate)
+				warlock.user.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 		}
 		
-		private function removeOnClickListeer():void
+		protected function secondaryActivation(event:MouseEvent = null):void
 		{
-			if (!Config.HAS_EASY_ACTIVATION && warlock.user.hasEventListener(MouseEvent.MOUSE_UP))
-				warlock.user.removeEventListener(MouseEvent.MOUSE_UP, onClick);
-		}
-		
-		protected function onClick(event:MouseEvent = null):void
-		{
-			removeOnClickListeer();
 			var mousePosition:Vector2D = InputHandler.instance.mousePosition;
 			var warlockPosition:Vector2D = warlock.position;
 			mousePosition.subtract(warlockPosition);
 			mousePosition.truncate(range);
 			mousePosition.add(warlockPosition);
-			onClickActivation(new DummySpatial(mousePosition.x, mousePosition.y));
+			onSecondaryActivation(new DummySpatial(mousePosition.x, mousePosition.y));
+			startRecharge();
 		}
 		
-		protected function onClickActivation(target:ISpatial):void
+		override protected function canActivate():Boolean
 		{
-			deactivate();
+			return !isRecharging && warlock;
+		}
+		
+		protected function onSecondaryActivation(target:ISpatial):void
+		{
+			
 		}
 	}
 }

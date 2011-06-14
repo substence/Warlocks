@@ -1,16 +1,24 @@
 package buffs
 {
 	import com.mistermartinez.interfaces.IDestroyable;
+	
+	import flash.display.DisplayObject;
+	import flash.events.EventDispatcher;
 
-	public class Buff implements IDestroyable
+	public class Buff extends EventDispatcher implements IDestroyable
 	{
 		public var target:IBuffable;
 		public var name:String;
 		public var description:String;
+		public var icon:DisplayObject;
 		public var isDebuff:Boolean;
+		public var charges:uint;
 		
 		public function Buff(isDebuff:Boolean = false)
 		{
+			name = "Buff";
+			description = "This is a buff";
+			charges = 0;
 			this.isDebuff = isDebuff;
 		}
 		

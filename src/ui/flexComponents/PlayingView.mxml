@@ -4,8 +4,9 @@
 		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" xmlns:flexComponents="ui.flexComponents.*" addedToStage="addedToStage(event)">
 	<fx:Script>
 		<![CDATA[
-			public var gameDirector:GameDirector;
 			private var _warlockUIs:Vector.<WarlockUI>;
+			[Bindable]
+			public var gameDirector:GameDirector;
 
 			protected function addedToStage(event:Event):void
 			{
@@ -25,7 +26,7 @@
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
 	<flexComponents:SkillsBar id="skillsBar" bottom="0" left="0"/>
-	<s:Label id="timerLabel"  paddingTop="10" horizontalCenter="0" text="00:00"/>
-	<s:Label id="pointsLabel" paddingTop="10" paddingRight="5" right="0" text="10" textAlign="right"/>
+	<s:Label id="timerLabel"  paddingTop="10" horizontalCenter="0" text="{gameDirector.gameTimer.durationInSeconds}"/>
+	<s:Label id="pointsLabel" paddingTop="10" paddingRight="5" right="0" textAlign="right" text="{gameDirector.user.points}"/>
 	<s:Label 			 	  paddingTop="10" paddingRight="5" right="{pointsLabel.width}" text="Points:" textAlign="right"/>
 </s:Group>

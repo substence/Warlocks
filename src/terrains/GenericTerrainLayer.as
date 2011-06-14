@@ -1,6 +1,7 @@
 package terrains
 {
 	import com.mistermartinez.math.Vector2D;
+	import com.mistermartinez.utils.InputHandler;
 	
 	import flash.display.DisplayObject;
 	import flash.display.Shape;
@@ -37,7 +38,8 @@ package terrains
 		{
 			var radius:Number = Math.min(dimensions.x, dimensions.y) * .5;
 			_graphic.graphics.clear();
-			_graphic.graphics.beginFill(0xCCCCCC);
+			_graphic.graphics.lineStyle(1.5, 0xCCCCCC, .8);
+			_graphic.graphics.beginFill(0xCCCCCC, .25);
 			_graphic.graphics.drawCircle( _maxDimensions.x * .5,  _maxDimensions.y * .5, radius);
 		}
 		

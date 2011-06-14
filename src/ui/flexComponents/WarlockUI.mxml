@@ -11,6 +11,8 @@
 			
 			import components.CProperty;
 			
+			import mouse.MouseView;
+			
 			import mx.core.FlexSprite;
 			import mx.core.UIComponent;
 			import mx.effects.AnimateProperty;
@@ -19,6 +21,7 @@
 			
 			import properties.Properties;
 			
+			import skills.ActivatableSkill;
 			import skills.Skill;
 			
 			import spark.components.Image;
@@ -36,6 +39,8 @@
 				x = warlock.position.x - healthBar.width * .5;
 				y = warlock.position.y - healthBar.height * .5;
 				healthBar.setProgress(_health.value, _health.maxmimum);
+				if (_rangeCircle.parent)
+					updateRangeCircle(warlock.activeSkill.range);
 			}
 
 			protected function addedToStage(event:Event):void
@@ -85,17 +90,22 @@
 				var range:Number = skill.range;
 				if (range > 0 && range < Number.MAX_VALUE)
 				{
-					_rangeCircle.graphics.clear();
-					_rangeCircle.graphics.lineStyle(1, warlock.user.color, .25);
-					_rangeCircle.graphics.drawCircle(warlock.graphic.width * .5, warlock.graphic.height * .5, range);
+					updateRangeCircle(range);
 					addElement(_rangeCircle);
-					skill.addEventListener(Skill.DEACTIVATE, deactivatedSkill);
+					skill.addEventListener(ActivatableSkill.DEACTIVATE, deactivatedSkill);
 				}
+			}
+			
+			private function updateRangeCircle(range:Number):void
+			{
+				_rangeCircle.graphics.clear();
+				_rangeCircle.graphics.lineStyle(1, warlock.user.color, .25);
+				_rangeCircle.graphics.drawCircle(warlock.graphic.width * .5, warlock.graphic.height * .5, range);
 			}
 			
 			private function deactivatedSkill(event:Event):void
 			{
-				event.target.removeEventListener(Skill.DEACTIVATE, deactivatedSkill);
+				event.target.removeEventListener(ActivatableSkill.DEACTIVATE, deactivatedSkill);
 				if (_rangeCircle)
 				{
 					removeElement(_rangeCircle);

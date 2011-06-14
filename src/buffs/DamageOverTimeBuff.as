@@ -12,7 +12,7 @@ package buffs
 	{
 		protected var _damage:Number;
 		
-		public function DamageOverTimeBuff(frequency:Number, damage:Number, ticks:uint = uint.MAX_VALUE, duration:Number=GameDirector.MATCH_DURATION)
+		public function DamageOverTimeBuff(frequency:Number, damage:Number, ticks:uint = uint.MAX_VALUE, duration:Number=-1)
 		{
 			super(frequency, ticks, duration, true);
 			_damage = damage;

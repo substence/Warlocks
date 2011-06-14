@@ -6,6 +6,8 @@ package skills.finalSkills
 	import com.mistermartinez.math.Vector2D;
 	import com.mistermartinez.utils.NumberRange;
 	
+	import flash.ui.MouseCursor;
+	
 	import projectiles.WarlockProjectile;
 	
 	import properties.Properties;
@@ -49,12 +51,11 @@ package skills.finalSkills
 		{
 			var startingPosition:Vector2D = warlock.position.clone();
 			var targetPosition:Vector2D = target.position.clone();
-			var projectile:WarlockProjectile = new WarlockProjectile(startingPosition, VectorArt.getCircle(2.5, 0x00FF00), _projectileDamage, _projectilePush);
+			var projectile:WarlockProjectile = new WarlockProjectile(startingPosition, VectorArt.getCircle(2.5, warlock.user.color), _projectileDamage, _projectilePush);
 			projectile.groupIndex = warlock.groupIndex;
 			projectile.doesDieOnHit = true;
 			warlock.addChild(projectile);
 			launchProjectile(projectile, new Vector2D(target.position.x - warlock.position.x, target.position.y - warlock.position.y));
-			deactivate();
 		}
 	}
 }
